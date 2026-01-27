@@ -116,7 +116,7 @@ export default function LandingPage() {
 
           {/* College Benefits */}
           <div className="rounded-2xl border border-gray-200 bg-white p-8 shadow-lg">
-            <h3 className="text-2xl font-bold text-gray-900">For College</h3>
+            <h3 className="text-2xl font-bold text-gray-900">College</h3>
             <ul className="mt-6 space-y-4">
               {[
                 'Enhanced placement statistics',
@@ -157,7 +157,7 @@ export default function LandingPage() {
       <footer className="border-t border-gray-200 bg-white">
         <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
           <p className="text-center text-sm text-gray-600">
-            © 2024 DR. Lankapalli Bullayya College of Engineering. All rights
+            © 2026 DR. Lankapalli Bullayya College of Engineering. All rights
             reserved.
           </p>
         </div>

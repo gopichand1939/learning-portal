@@ -15,26 +15,29 @@ import {
   ArrowLeft,
 } from 'lucide-react'
 import Link from 'next/link'
+import { aptitudeDailyContent } from '@/lib/daily-learning/aptitude'
 import {
   dailyProgress,
-  aptitudeTopics,
-  practiceQuestions,
-  testQuestions,
   dailySchedule,
 } from '@/lib/mockData'
+import type { AptitudeDayContent } from '@/lib/daily-learning/aptitude/types'
 
 export default function AptitudeDayPage() {
   const params = useParams()
   const day = params?.day as string
   const dayNumber = parseInt(day?.replace('day-', '') || '1')
 
-  const [practiceAnswers, setPracticeAnswers] = useState<{
-    [key: number]: string
-  }>({})
+  const [practiceAnswers, setPracticeAnswers] = useState<Record<number, string | number>>(
+    {}
+  )
   const [practiceSubmitted, setPracticeSubmitted] = useState(false)
   const [testAnswers, setTestAnswers] = useState<{ [key: number]: number }>({})
   const [testSubmitted, setTestSubmitted] = useState(false)
   const [currentTestQuestion, setCurrentTestQuestion] = useState(0)
+
+  const dayContent: AptitudeDayContent =
+    (aptitudeDailyContent as Record<number, AptitudeDayContent>)[dayNumber] ??
+    aptitudeDailyContent[1]
 
   const overallProgress =
     (dailyProgress.learn.progress +
@@ -56,21 +59,9 @@ export default function AptitudeDayPage() {
     return Math.round((correct / aptitudeTestQuestions.length) * 100)
   }
 
-  // Filter questions for Aptitude section
-  const aptitudePracticeQuestions = practiceQuestions.filter((q) =>
-    ['Number System', 'Percentage & Profit Loss', 'Time, Speed & Distance'].includes(q.topic)
-  )
-
-  const aptitudeTestQuestions = testQuestions.filter((q) =>
-    [
-      'Number System',
-      'Percentage & Profit Loss',
-      'Time, Speed & Distance',
-      'Ratio & Proportion',
-      'Permutation & Combination',
-      'Algebra & Equations',
-    ].includes(q.topic)
-  )
+  const aptitudeTopics = dayContent.topics
+  const aptitudePracticeQuestions = dayContent.practiceQuestions
+  const aptitudeTestQuestions = dayContent.testQuestions
 
   return (
     <DashboardLayout>
@@ -291,7 +282,7 @@ export default function AptitudeDayPage() {
                   Practice
                 </h2>
                 <p className="text-sm text-gray-600">
-                  Solve 5 practice questions (Enter final answer only)
+                  Solve {aptitudePracticeQuestions.length} practice questions
                 </p>
               </div>
             </div>
@@ -309,68 +300,131 @@ export default function AptitudeDayPage() {
 
           {/* Practice Questions */}
           <div className="space-y-6">
-            {aptitudePracticeQuestions.map((q) => (
-              <div
-                key={q.id}
-                className="rounded-lg border border-gray-200 bg-gray-50 p-5"
-              >
-                <div className="mb-3 flex items-center justify-between">
-                  <span className="rounded-full bg-primary-100 px-3 py-1 text-xs font-semibold text-primary-700">
-                    Question {q.id} of {aptitudePracticeQuestions.length}
-                  </span>
-                  <span className="flex items-center gap-1 text-xs text-gray-500">
-                    <Clock className="h-3 w-3" />
-                    5 min
-                  </span>
-                </div>
-                <div className="mb-2">
-                  <span className="rounded-full bg-blue-100 px-2 py-1 text-xs font-semibold text-blue-700">
-                    {q.topic}
-                  </span>
-                </div>
-                <h3 className="mb-3 text-base font-semibold text-gray-900">
-                  {q.question}
-                </h3>
-                {!practiceSubmitted ? (
-                  <input
-                    type="text"
-                    value={practiceAnswers[q.id] || ''}
-                    onChange={(e) =>
-                      setPracticeAnswers({
-                        ...practiceAnswers,
-                        [q.id]: e.target.value,
-                      })
-                    }
-                    placeholder="Enter final answer..."
-                    className="w-full rounded-lg border border-gray-300 bg-white p-3 text-sm focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-200"
-                  />
-                ) : (
-                  <div className="space-y-3">
-                    <div className="rounded-lg border-2 border-gray-300 bg-gray-50 p-3">
-                      <p className="text-xs font-semibold text-gray-600 mb-1">Your Answer:</p>
-                      <p className="text-sm text-gray-900">
-                        {practiceAnswers[q.id] || 'Not answered'}
-                      </p>
-                    </div>
-                    <div className="rounded-lg border-2 border-green-300 bg-green-50 p-3">
-                      <p className="text-xs font-semibold text-green-700 mb-1">Correct Answer:</p>
-                      <p className="text-sm font-semibold text-green-900">{q.correctAnswer}</p>
-                    </div>
-                    <div className="rounded-lg border border-blue-200 bg-blue-50 p-4">
-                      <p className="text-xs font-semibold text-blue-900 mb-2">Step-by-Step Solution:</p>
-                      <ul className="space-y-1.5">
-                        {q.solution.map((step, stepIdx) => (
-                          <li key={stepIdx} className="flex items-start gap-2 text-sm text-blue-800">
-                            <span className="mt-1 h-1 w-1 flex-shrink-0 rounded-full bg-blue-600"></span>
-                            <span>{step}</span>
-                          </li>
-                        ))}
-                      </ul>
-                    </div>
+            {aptitudePracticeQuestions.map((q) => {
+              const anyQ = q as any
+              const isMcq = Array.isArray(anyQ.options)
+              const correctOptionIndex =
+                typeof anyQ.correctOptionIndex === 'number'
+                  ? (anyQ.correctOptionIndex as number)
+                  : undefined
+              const selectedOptionIndex =
+                typeof practiceAnswers[q.id] === 'number'
+                  ? (practiceAnswers[q.id] as number)
+                  : undefined
+
+              return (
+                <div
+                  key={q.id}
+                  className="rounded-lg border border-gray-200 bg-gray-50 p-5"
+                >
+                  <div className="mb-3 flex items-center justify-between">
+                    <span className="rounded-full bg-primary-100 px-3 py-1 text-xs font-semibold text-primary-700">
+                      Question {q.id} of {aptitudePracticeQuestions.length}
+                    </span>
+                    <span className="flex items-center gap-1 text-xs text-gray-500">
+                      <Clock className="h-3 w-3" />
+                      5 min
+                    </span>
                   </div>
-                )}
-              </div>
-            ))}
+                  <div className="mb-2">
+                    <span className="rounded-full bg-blue-100 px-2 py-1 text-xs font-semibold text-blue-700">
+                      {q.topic}
+                    </span>
+                  </div>
+                  <h3 className="mb-3 text-base font-semibold text-gray-900">
+                    {q.question}
+                  </h3>
+
+                  {!practiceSubmitted ? (
+                    isMcq ? (
+                      <div className="space-y-3">
+                        {anyQ.options.map((option: string, idx: number) => (
+                          <label
+                            key={idx}
+                            className={`flex cursor-pointer items-center gap-3 rounded-lg border p-3 transition-colors ${
+                              selectedOptionIndex === idx
+                                ? 'border-primary-500 bg-primary-50'
+                                : 'border-gray-200 bg-white hover:border-primary-300 hover:bg-primary-50'
+                            }`}
+                          >
+                            <input
+                              type="radio"
+                              name={`practice-${q.id}`}
+                              checked={selectedOptionIndex === idx}
+                              onChange={() =>
+                                setPracticeAnswers({
+                                  ...practiceAnswers,
+                                  [q.id]: idx,
+                                })
+                              }
+                              className="h-4 w-4 text-primary-600"
+                            />
+                            <span className="text-sm text-gray-700">
+                              {option}
+                            </span>
+                          </label>
+                        ))}
+                      </div>
+                    ) : (
+                      <input
+                        type="text"
+                        value={(practiceAnswers[q.id] as string) || ''}
+                        onChange={(e) =>
+                          setPracticeAnswers({
+                            ...practiceAnswers,
+                            [q.id]: e.target.value,
+                          })
+                        }
+                        placeholder="Enter final answer..."
+                        className="w-full rounded-lg border border-gray-300 bg-white p-3 text-sm focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-200"
+                      />
+                    )
+                  ) : (
+                    <div className="space-y-3">
+                      <div className="rounded-lg border-2 border-gray-300 bg-gray-50 p-3">
+                        <p className="text-xs font-semibold text-gray-600 mb-1">
+                          Your Answer:
+                        </p>
+                        <p className="text-sm text-gray-900">
+                          {isMcq
+                            ? selectedOptionIndex !== undefined
+                              ? anyQ.options[selectedOptionIndex]
+                              : 'Not answered'
+                            : (practiceAnswers[q.id] as string) ||
+                              'Not answered'}
+                        </p>
+                      </div>
+                      <div className="rounded-lg border-2 border-green-300 bg-green-50 p-3">
+                        <p className="text-xs font-semibold text-green-700 mb-1">
+                          Correct Answer:
+                        </p>
+                        <p className="text-sm font-semibold text-green-900">
+                          {isMcq && correctOptionIndex !== undefined
+                            ? anyQ.options[correctOptionIndex]
+                            : q.correctAnswer}
+                        </p>
+                      </div>
+                      <div className="rounded-lg border border-blue-200 bg-blue-50 p-4">
+                        <p className="text-xs font-semibold text-blue-900 mb-2">
+                          Step-by-Step Solution:
+                        </p>
+                        <ul className="space-y-1.5">
+                          {q.solution.map((step, stepIdx) => (
+                            <li
+                              key={stepIdx}
+                              className="flex items-start gap-2 text-sm text-blue-800"
+                            >
+                              <span className="mt-1 h-1 w-1 flex-shrink-0 rounded-full bg-blue-600"></span>
+                              <span>{step}</span>
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              )
+            })}
             {!practiceSubmitted ? (
               <button
                 onClick={() => setPracticeSubmitted(true)}
@@ -398,7 +452,7 @@ export default function AptitudeDayPage() {
               <div>
                 <h2 className="text-xl font-semibold text-gray-900">Test</h2>
                 <p className="text-sm text-gray-600">
-                  Take the daily assessment test (20 MCQ questions)
+                  Take the daily assessment test ({aptitudeTestQuestions.length} MCQ questions)
                 </p>
               </div>
             </div>

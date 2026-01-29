@@ -73,7 +73,7 @@ const menuItems: MenuItem[] = [
   },
   { href: '/progress', label: 'Progress Tracking', icon: BarChart3 },
   { href: '/certificate', label: 'Certificate', icon: Award },
-  { href: '/placement-priority', label: 'Placement Priority', icon: Target },
+  { href: '/placement-priority', label: 'Placement', icon: Target },
   { href: '/course-locked', label: 'Course Access', icon: Lock },
   { href: '/course-details', label: 'View All Course Details', icon: List },
 ]

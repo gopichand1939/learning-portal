@@ -1,9 +1,21 @@
 'use client'
 
+import { useEffect } from 'react'
+import { useRouter } from 'next/navigation'
 import DashboardLayout from '@/components/DashboardLayout'
-import { Lock, CreditCard, AlertCircle } from 'lucide-react'
+import RazorpayCheckoutButton from '@/components/RazorpayCheckoutButton'
+import { Lock, AlertCircle } from 'lucide-react'
 
 export default function CourseLockedPage() {
+  const router = useRouter()
+
+  useEffect(() => {
+    try {
+      const unlocked = localStorage.getItem('courseUnlocked') === 'true'
+      if (unlocked) router.replace('/course-details')
+    } catch {}
+  }, [router])
+
   return (
     <DashboardLayout>
       <div className="flex min-h-[calc(100vh-8rem)] items-center justify-center">
@@ -27,10 +39,7 @@ export default function CourseLockedPage() {
                 </p>
 
                 {/* Payment Button */}
-                <button className="mt-8 inline-flex items-center gap-2 rounded-lg bg-primary-600 px-8 py-3 font-semibold text-white transition-colors hover:bg-primary-700">
-                  <CreditCard className="h-5 w-5" />
-                  Proceed to Payment
-                </button>
+                <RazorpayCheckoutButton />
 
                 {/* Info Message */}
                 <div className="mt-6 flex items-start gap-3 rounded-lg border border-primary-200 bg-primary-50 p-4 text-left">

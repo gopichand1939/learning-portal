@@ -19,7 +19,6 @@ function VerbalContent() {
       ? { selectedNode: found.node, selectedPath: found.path }
       : { selectedNode: null, selectedPath: [] }
   }, [nodeId])
-  const progress = moduleProgressDefault.verbal
 
   return (
     <div className="flex flex-col gap-6">

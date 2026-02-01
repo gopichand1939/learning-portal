@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import Image from 'next/image'
 import { ChevronLeft, ChevronRight } from 'lucide-react'
 
@@ -12,8 +12,17 @@ const CAROUSEL_IMAGES = [
 
 const INTERVAL_MS = 5000
 
+/** Tiny blur placeholder for instant show while image loads */
+const BLUR_DATA =
+  'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNDAiIHZpZXdCb3g9IjAgMCA2MCA0MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iNjAiIGhlaWdodD0iNDAiIGZpbGw9IiNlNWU3ZWIiLz48L3N2Zz4='
+
 export default function HomeCarousel() {
   const [index, setIndex] = useState(0)
+  const [loaded, setLoaded] = useState<Record<number, boolean>>({})
+
+  const onLoad = useCallback((i: number) => {
+    setLoaded((prev) => ({ ...prev, [i]: true }))
+  }, [])
 
   useEffect(() => {
     const id = setInterval(() => {
@@ -25,10 +34,21 @@ export default function HomeCarousel() {
   const goPrev = () => setIndex((i) => (i - 1 + CAROUSEL_IMAGES.length) % CAROUSEL_IMAGES.length)
   const goNext = () => setIndex((i) => (i + 1) % CAROUSEL_IMAGES.length)
 
+  const currentLoaded = loaded[index]
+
   return (
-    <section className="relative w-full">
-      <div className="relative overflow-hidden w-full bg-gray-100">
+    <section className="relative w-full bg-white">
+      <div className="relative overflow-hidden w-full bg-white">
         <div className="relative w-full min-h-[45vh] sm:min-h-[55vh] md:min-h-[65vh]">
+          {/* Instant loading placeholder – shows until active image loads */}
+          <div
+            className={`absolute inset-0 z-0 flex items-center justify-center bg-white transition-opacity duration-300 ${
+              currentLoaded ? 'opacity-0 pointer-events-none' : 'opacity-100'
+            }`}
+            aria-hidden
+          >
+            <div className="h-12 w-12 animate-pulse rounded-full bg-gray-300/50" />
+          </div>
           {CAROUSEL_IMAGES.map((img, i) => (
             <div
               key={img.src}
@@ -43,7 +63,9 @@ export default function HomeCarousel() {
                 className="object-contain object-center"
                 sizes="100vw"
                 priority={i === 0}
-                unoptimized
+                placeholder="blur"
+                blurDataURL={BLUR_DATA}
+                onLoad={() => onLoad(i)}
               />
             </div>
           ))}

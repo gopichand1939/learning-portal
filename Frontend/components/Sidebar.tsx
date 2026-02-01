@@ -107,8 +107,10 @@ export default function Sidebar({ isOpen = false, onClose }: SidebarProps) {
   })
 
   const handleLogout = () => {
-    // In a real app, this would clear session/tokens
-    // For demo, just redirect to login page
+    if (typeof window !== 'undefined') {
+      localStorage.removeItem('token')
+      localStorage.removeItem('user')
+    }
     window.location.href = '/login'
   }
 

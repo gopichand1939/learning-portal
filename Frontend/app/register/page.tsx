@@ -1,30 +1,66 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import Image from 'next/image'
-import { Lock, User, Hash } from 'lucide-react'
+import { Lock, Mail, User } from 'lucide-react'
 import collegelogo from '@/app/collegelogo.png'
 
-export default function LoginPage() {
-  const router = useRouter()
-  const [formData, setFormData] = useState({
-    rollNumber: '',
-    username: '',
-    password: '',
-  })
+const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:15013'
 
-  const handleSubmit = (e: React.FormEvent) => {
+export default function RegisterPage() {
+  const router = useRouter()
+  const [email, setEmail] = useState('')
+  const [password, setPassword] = useState('')
+  const [name, setName] = useState('')
+  const [error, setError] = useState('')
+  const [loading, setLoading] = useState(false)
+  const [checking, setChecking] = useState(true)
+
+  useEffect(() => {
+    const token = typeof window !== 'undefined' ? localStorage.getItem('token') : null
+    if (token) {
+      router.replace('/dashboard')
+      return
+    }
+    setChecking(false)
+  }, [router])
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    // Mock login - redirect to dashboard
-    router.push('/dashboard')
+    setError('')
+    setLoading(true)
+    try {
+      const res = await fetch(`${API_URL}/api/auth/register`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password, name: name || undefined }),
+      })
+      const data = await res.json().catch(() => ({}))
+      if (!res.ok) {
+        setError(data.error || 'Registration failed')
+        setLoading(false)
+        return
+      }
+      router.push('/login?registered=1')
+    } catch {
+      setError('Network error. Is the backend running?')
+      setLoading(false)
+    }
+  }
+
+  if (checking) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-primary-50 via-white to-primary-50">
+        <p className="text-gray-500">Checking…</p>
+      </div>
+    )
   }
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-primary-50 via-white to-primary-50 px-4 py-12">
       <div className="w-full max-w-md">
-        {/* Header */}
         <div className="mb-8 text-center">
           <Link href="/" className="inline-flex items-center gap-3">
             <Image
@@ -43,82 +79,62 @@ export default function LoginPage() {
           </Link>
         </div>
 
-        {/* Login Card */}
         <div className="rounded-2xl border border-gray-200 bg-white p-8 shadow-xl">
           <div className="mb-6 text-center">
-            <h2 className="text-2xl font-bold text-gray-900">Student Login</h2>
+            <h2 className="text-2xl font-bold text-gray-900">Register</h2>
             <p className="mt-2 text-sm text-gray-600">
-              Access your placement learning dashboard
+              Create an account to access the placement portal
             </p>
           </div>
 
-          {/* College Only Access Message */}
-          <div className="mb-6 rounded-lg border border-primary-200 bg-primary-50 p-4">
-            <div className="flex items-start gap-3">
-              <Lock className="mt-0.5 h-5 w-5 text-primary-600" />
-              <div>
-                <p className="text-sm font-semibold text-primary-900">
-                  College-Only Access
-                </p>
-                <p className="mt-1 text-xs text-primary-700">
-                  This portal is exclusively for DR. Lankapalli Bullayya College
-                  students.
-                </p>
-              </div>
+          {error && (
+            <div className="mb-4 rounded-lg border border-red-200 bg-red-50 px-4 py-2 text-sm text-red-700">
+              {error}
             </div>
-          </div>
+          )}
 
-          {/* Login Form */}
           <form onSubmit={handleSubmit} className="space-y-5">
-            {/* Roll Number */}
             <div>
               <label
-                htmlFor="rollNumber"
+                htmlFor="name"
                 className="mb-2 block text-sm font-medium text-gray-700"
               >
-                Roll Number
-              </label>
-              <div className="relative">
-                <Hash className="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-gray-400" />
-                <input
-                  id="rollNumber"
-                  type="text"
-                  value={formData.rollNumber}
-                  onChange={(e) =>
-                    setFormData({ ...formData, rollNumber: e.target.value })
-                  }
-                  placeholder="LB21CS001"
-                  className="w-full rounded-lg border border-gray-300 bg-gray-50 py-2.5 pl-10 pr-4 text-sm focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-200"
-                  required
-                />
-              </div>
-            </div>
-
-            {/* Username */}
-            <div>
-              <label
-                htmlFor="username"
-                className="mb-2 block text-sm font-medium text-gray-700"
-              >
-                Username
+                Name (optional)
               </label>
               <div className="relative">
                 <User className="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-gray-400" />
                 <input
-                  id="username"
+                  id="name"
                   type="text"
-                  value={formData.username}
-                  onChange={(e) =>
-                    setFormData({ ...formData, username: e.target.value })
-                  }
-                  placeholder="Enter your username"
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  placeholder="Your name"
+                  className="w-full rounded-lg border border-gray-300 bg-gray-50 py-2.5 pl-10 pr-4 text-sm focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-200"
+                />
+              </div>
+            </div>
+
+            <div>
+              <label
+                htmlFor="email"
+                className="mb-2 block text-sm font-medium text-gray-700"
+              >
+                Email
+              </label>
+              <div className="relative">
+                <Mail className="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-gray-400" />
+                <input
+                  id="email"
+                  type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  placeholder="you@example.com"
                   className="w-full rounded-lg border border-gray-300 bg-gray-50 py-2.5 pl-10 pr-4 text-sm focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-200"
                   required
                 />
               </div>
             </div>
 
-            {/* Password */}
             <div>
               <label
                 htmlFor="password"
@@ -131,33 +147,33 @@ export default function LoginPage() {
                 <input
                   id="password"
                   type="password"
-                  value={formData.password}
-                  onChange={(e) =>
-                    setFormData({ ...formData, password: e.target.value })
-                  }
-                  placeholder="Enter your password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  placeholder="Choose a password"
                   className="w-full rounded-lg border border-gray-300 bg-gray-50 py-2.5 pl-10 pr-4 text-sm focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-200"
                   required
+                  minLength={6}
                 />
               </div>
             </div>
 
-            {/* Submit Button */}
             <button
               type="submit"
-              className="w-full rounded-lg bg-primary-600 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2"
+              disabled={loading}
+              className="w-full rounded-lg bg-primary-600 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 disabled:opacity-60"
             >
-              Sign In
+              {loading ? 'Creating account…' : 'Register'}
             </button>
           </form>
 
-          {/* Demo Note */}
-          <p className="mt-6 text-center text-xs text-gray-500">
-            Demo Mode: Any credentials will work
+          <p className="mt-6 text-center text-sm text-gray-500">
+            Already have an account?{' '}
+            <Link href="/login" className="font-medium text-primary-600 hover:text-primary-700">
+              Sign in
+            </Link>
           </p>
         </div>
 
-        {/* Back to Home */}
         <div className="mt-6 text-center">
           <Link
             href="/"
@@ -170,4 +186,3 @@ export default function LoginPage() {
     </div>
   )
 }
-

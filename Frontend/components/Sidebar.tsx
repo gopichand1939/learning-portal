@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, Suspense } from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import {
@@ -18,8 +18,11 @@ import {
   Calculator,
   Brain,
   MessageSquare,
+  Code2,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
+import SidebarModuleTree from './SidebarModuleTree'
+import { aptitudeModule, reasoningModule, verbalModule, pythonModule } from '@/lib/learningModules'
 
 type MenuItem = {
   href: string
@@ -29,48 +32,13 @@ type MenuItem = {
     href: string
     label: string
     icon: React.ComponentType<{ className?: string }>
-    children?: Array<{
-      href: string
-      label: string
-    }>
+    children?: Array<{ href: string; label: string }>
   }>
-}
-
-// Generate day menu items (Day 1 to Day 30)
-const generateDayItems = (basePath: string) => {
-  return Array.from({ length: 30 }, (_, i) => ({
-    href: `${basePath}/day-${i + 1}`,
-    label: `Day ${i + 1}`,
-  }))
 }
 
 const menuItems: MenuItem[] = [
   { href: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
-  {
-    href: '/daily-learning',
-    label: 'Daily Learning',
-    icon: BookOpen,
-    children: [
-      {
-        href: '/daily-learning/aptitude',
-        label: 'Aptitude',
-        icon: Calculator,
-        children: generateDayItems('/daily-learning/aptitude'),
-      },
-      {
-        href: '/daily-learning/reasoning',
-        label: 'Reasoning',
-        icon: Brain,
-        children: generateDayItems('/daily-learning/reasoning'),
-      },
-      {
-        href: '/daily-learning/verbal',
-        label: 'Verbal Ability',
-        icon: MessageSquare,
-        children: generateDayItems('/daily-learning/verbal'),
-      },
-    ],
-  },
+  { href: '/daily-learning', label: 'Daily Learning', icon: BookOpen },
   { href: '/progress', label: 'Progress Tracking', icon: BarChart3 },
   { href: '/certificate', label: 'Certificate', icon: Award },
   { href: '/placement-priority', label: 'Placement', icon: Target },
@@ -83,27 +51,28 @@ interface SidebarProps {
   onClose?: () => void
 }
 
+type DailySection = 'aptitude' | 'reasoning' | 'verbal' | 'python'
+
 export default function Sidebar({ isOpen = false, onClose }: SidebarProps) {
   const pathname = usePathname()
   const [expandedMenus, setExpandedMenus] = useState<string[]>(() => {
-    // Auto-expand Daily Learning if on any of its child routes
     const expanded: string[] = []
     if (
       pathname?.startsWith('/daily-learning/aptitude') ||
       pathname?.startsWith('/daily-learning/reasoning') ||
-      pathname?.startsWith('/daily-learning/verbal')
+      pathname?.startsWith('/daily-learning/verbal') ||
+      pathname?.startsWith('/daily-learning/python')
     ) {
       expanded.push('/daily-learning')
-      // Auto-expand the specific section if on a day route
-      if (pathname?.startsWith('/daily-learning/aptitude')) {
-        expanded.push('/daily-learning/aptitude')
-      } else if (pathname?.startsWith('/daily-learning/reasoning')) {
-        expanded.push('/daily-learning/reasoning')
-      } else if (pathname?.startsWith('/daily-learning/verbal')) {
-        expanded.push('/daily-learning/verbal')
-      }
     }
     return expanded
+  })
+  const [expandedDailySection, setExpandedDailySection] = useState<DailySection | null>(() => {
+    if (pathname?.startsWith('/daily-learning/aptitude')) return 'aptitude'
+    if (pathname?.startsWith('/daily-learning/reasoning')) return 'reasoning'
+    if (pathname?.startsWith('/daily-learning/verbal')) return 'verbal'
+    if (pathname?.startsWith('/daily-learning/python')) return 'python'
+    return null
   })
 
   const handleLogout = () => {
@@ -120,18 +89,21 @@ export default function Sidebar({ isOpen = false, onClose }: SidebarProps) {
     )
   }
 
+  const toggleDailySection = (section: DailySection) => {
+    setExpandedDailySection((prev) => (prev === section ? null : section))
+  }
+
   const isMenuExpanded = (href: string) => expandedMenus.includes(href)
   const hasActiveChild = (children?: MenuItem['children']) => {
     if (!children) return false
-    return children.some((child) => {
-      if (pathname === child.href) return true
-      // Check nested children (days)
-      if (child.children) {
-        return child.children.some((day) => pathname === day.href)
-      }
-      return false
-    })
+    return children.some((child) => pathname === child.href || child.children?.some((day) => pathname === day.href))
   }
+  const isDailyLearningActive =
+    pathname === '/daily-learning' ||
+    pathname?.startsWith('/daily-learning/aptitude') ||
+    pathname?.startsWith('/daily-learning/reasoning') ||
+    pathname?.startsWith('/daily-learning/verbal') ||
+    pathname?.startsWith('/daily-learning/python')
 
   return (
     <>
@@ -169,9 +141,124 @@ export default function Sidebar({ isOpen = false, onClose }: SidebarProps) {
           <nav className="flex-1 space-y-1">
             {menuItems.map((item) => {
               const Icon = item.icon
-              const isActive = pathname === item.href || hasActiveChild(item.children)
+              const isDailyLearning = item.href === '/daily-learning'
+              const isActive = isDailyLearning
+                ? isDailyLearningActive
+                : pathname === item.href || hasActiveChild(item.children)
               const isExpanded = isMenuExpanded(item.href)
-              const hasChildren = item.children && item.children.length > 0
+              const hasChildren = !isDailyLearning && item.children && item.children.length > 0
+
+              if (isDailyLearning) {
+                return (
+                  <div key={item.href}>
+                    <button
+                      onClick={() => toggleMenu(item.href)}
+                      className={cn(
+                        'flex w-full items-center justify-between rounded-lg px-3 py-2.5 text-sm font-medium transition-colors',
+                        isActive ? 'bg-primary-50 text-primary-700' : 'text-gray-700 hover:bg-gray-100'
+                      )}
+                    >
+                      <div className="flex items-center gap-3">
+                        <Icon className="h-5 w-5" />
+                        <span>{item.label}</span>
+                      </div>
+                      {isExpanded ? <ChevronDown className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
+                    </button>
+                    {isExpanded && (
+                      <div className="ml-2 mt-1 space-y-0">
+                        <div>
+                          <button
+                            type="button"
+                            onClick={() => toggleDailySection('aptitude')}
+                            className={cn(
+                              'flex w-full items-center justify-between gap-2 rounded-lg px-2 py-1.5 text-left text-sm font-medium transition-colors',
+                              pathname?.startsWith('/daily-learning/aptitude')
+                                ? 'bg-primary-50 text-primary-700'
+                                : 'text-gray-700 hover:bg-gray-100'
+                            )}
+                            aria-expanded={expandedDailySection === 'aptitude'}
+                          >
+                            <Calculator className="h-4 w-4 shrink-0" />
+                            <span className="min-w-0 flex-1 truncate">{aptitudeModule.label}</span>
+                            {expandedDailySection === 'aptitude' ? <ChevronDown className="h-3.5 w-3 shrink-0" /> : <ChevronRight className="h-3.5 w-3 shrink-0" />}
+                          </button>
+                          {expandedDailySection === 'aptitude' && (
+                            <Suspense fallback={null}>
+                              <SidebarModuleTree root={aptitudeModule} moduleSlug="aptitude" onClose={onClose} />
+                            </Suspense>
+                          )}
+                        </div>
+                        <div>
+                          <button
+                            type="button"
+                            onClick={() => toggleDailySection('reasoning')}
+                            className={cn(
+                              'flex w-full items-center justify-between gap-2 rounded-lg px-2 py-1.5 text-left text-sm font-medium transition-colors',
+                              pathname?.startsWith('/daily-learning/reasoning')
+                                ? 'bg-primary-50 text-primary-700'
+                                : 'text-gray-700 hover:bg-gray-100'
+                            )}
+                            aria-expanded={expandedDailySection === 'reasoning'}
+                          >
+                            <Brain className="h-4 w-4 shrink-0" />
+                            <span className="min-w-0 flex-1 truncate">{reasoningModule.label}</span>
+                            {expandedDailySection === 'reasoning' ? <ChevronDown className="h-3.5 w-3 shrink-0" /> : <ChevronRight className="h-3.5 w-3 shrink-0" />}
+                          </button>
+                          {expandedDailySection === 'reasoning' && (
+                            <Suspense fallback={null}>
+                              <SidebarModuleTree root={reasoningModule} moduleSlug="reasoning" onClose={onClose} />
+                            </Suspense>
+                          )}
+                        </div>
+                        <div>
+                          <button
+                            type="button"
+                            onClick={() => toggleDailySection('verbal')}
+                            className={cn(
+                              'flex w-full items-center justify-between gap-2 rounded-lg px-2 py-1.5 text-left text-sm font-medium transition-colors',
+                              pathname?.startsWith('/daily-learning/verbal')
+                                ? 'bg-primary-50 text-primary-700'
+                                : 'text-gray-700 hover:bg-gray-100'
+                            )}
+                            aria-expanded={expandedDailySection === 'verbal'}
+                          >
+                            <MessageSquare className="h-4 w-4 shrink-0" />
+                            <span className="min-w-0 flex-1 truncate">{verbalModule.label}</span>
+                            {expandedDailySection === 'verbal' ? <ChevronDown className="h-3.5 w-3 shrink-0" /> : <ChevronRight className="h-3.5 w-3 shrink-0" />}
+                          </button>
+                          {expandedDailySection === 'verbal' && (
+                            <Suspense fallback={null}>
+                              <SidebarModuleTree root={verbalModule} moduleSlug="verbal" onClose={onClose} />
+                            </Suspense>
+                          )}
+                        </div>
+                        <div>
+                          <button
+                            type="button"
+                            onClick={() => toggleDailySection('python')}
+                            className={cn(
+                              'flex w-full items-center justify-between gap-2 rounded-lg px-2 py-1.5 text-left text-sm font-medium transition-colors',
+                              pathname?.startsWith('/daily-learning/python')
+                                ? 'bg-primary-50 text-primary-700'
+                                : 'text-gray-700 hover:bg-gray-100'
+                            )}
+                            aria-expanded={expandedDailySection === 'python'}
+                          >
+                            <Code2 className="h-4 w-4 shrink-0" />
+                            <span className="min-w-0 flex-1 truncate">{pythonModule.label}</span>
+                            {expandedDailySection === 'python' ? <ChevronDown className="h-3.5 w-3 shrink-0" /> : <ChevronRight className="h-3.5 w-3 shrink-0" />}
+                          </button>
+                          {expandedDailySection === 'python' && (
+                            <Suspense fallback={null}>
+                              <SidebarModuleTree root={pythonModule} moduleSlug="python" onClose={onClose} />
+                            </Suspense>
+                          )}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                )
+              }
 
               return (
                 <div key={item.href}>

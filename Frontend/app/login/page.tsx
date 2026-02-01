@@ -1,15 +1,24 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { Suspense, useState, useEffect } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 import Image from 'next/image'
 import { Lock, Mail } from 'lucide-react'
 import collegelogo from '@/app/collegelogo.png'
+import { API_AUTH_LOGIN } from '@/lib/constants'
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:15013'
+function LoginFallback() {
 
-export default function LoginPage() {
+  
+  return (
+    <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-primary-50 via-white to-primary-50">
+      <p className="text-gray-500">Loading…</p>
+    </div>
+  )
+}
+
+function LoginContent() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const [email, setEmail] = useState('')
@@ -34,7 +43,7 @@ export default function LoginPage() {
     setError('')
     setLoading(true)
     try {
-      const res = await fetch(`${API_URL}/api/auth/login`, {
+      const res = await fetch(API_AUTH_LOGIN, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email, password }),
@@ -204,5 +213,13 @@ export default function LoginPage() {
         </div>
       </div>
     </div>
+  )
+}
+
+export default function LoginPage() {
+  return (
+    <Suspense fallback={<LoginFallback />}>
+      <LoginContent />
+    </Suspense>
   )
 }

@@ -1,51 +1,83 @@
 'use client'
 
+import { Suspense, useMemo } from 'react'
 import DashboardLayout from '@/components/DashboardLayout'
 import Link from 'next/link'
-import { ArrowLeft, Calendar } from 'lucide-react'
+import { useSearchParams } from 'next/navigation'
+import { ArrowLeft, Award } from 'lucide-react'
+import ModuleContentPanel from '@/components/ModuleContentPanel'
+import { reasoningModule, findNodeById } from '@/lib/learningModules'
+import type { ModuleNode } from '@/lib/learningModules'
 
-export default function ReasoningPage() {
-  const days = Array.from({ length: 30 }, (_, i) => i + 1)
-
+function ReasoningContent() {
+  const searchParams = useSearchParams()
+  const nodeId = searchParams.get('node')
+  const { selectedNode, selectedPath } = useMemo(() => {
+    if (!nodeId) return { selectedNode: null as ModuleNode | null, selectedPath: [] as string[] }
+    const found = findNodeById(reasoningModule, nodeId)
+    return found
+      ? { selectedNode: found.node, selectedPath: found.path }
+      : { selectedNode: null, selectedPath: [] }
+  }, [nodeId])
   return (
-    <DashboardLayout>
-      <div className="space-y-6">
-        {/* Page Header */}
-        <div className="flex items-center gap-4">
-          <Link
-            href="/daily-learning"
-            className="flex items-center gap-2 rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50"
-          >
-            <ArrowLeft className="h-4 w-4" />
-            Back
-          </Link>
-          <div>
-            <h1 className="text-3xl font-bold text-gray-900">
-              Reasoning - 30 Days Program
-            </h1>
-            <p className="mt-2 text-gray-600">
-              Select a day to start your reasoning learning
-            </p>
-          </div>
-        </div>
-
-        {/* Days Grid */}
-        <div className="grid gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 xl:grid-cols-6">
-          {days.map((day) => (
-            <Link
-              key={day}
-              href={`/daily-learning/reasoning/day-${day}`}
-              className="group flex flex-col items-center justify-center rounded-xl border-2 border-gray-200 bg-white p-6 shadow-sm transition-all hover:border-primary-500 hover:shadow-lg"
-            >
-              <div className="mb-3 flex h-16 w-16 items-center justify-center rounded-full bg-green-100 group-hover:bg-green-200">
-                <Calendar className="h-8 w-8 text-green-600" />
-              </div>
-              <h3 className="text-lg font-semibold text-gray-900">Day {day}</h3>
-              <p className="mt-1 text-xs text-gray-500">Click to start</p>
-            </Link>
-          ))}
+    <div className="flex flex-col gap-6">
+      <div className="flex items-center gap-4">
+        <Link
+          href="/daily-learning"
+          className="flex items-center gap-2 rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50"
+        >
+          <ArrowLeft className="h-4 w-4" />
+          Back
+        </Link>
+        <div>
+          <h1 className="text-2xl font-bold text-gray-900 md:text-3xl">
+            Logical Reasoning
+          </h1>
+          <p className="mt-1 text-gray-600">
+            Module-wise learning — select a topic from the sidebar
+          </p>
         </div>
       </div>
+
+      <div className="min-h-[400px]">
+        <ModuleContentPanel
+          selectedNode={selectedNode}
+          path={selectedPath}
+          moduleTitle="Logical Reasoning"
+        />
+      </div>
+
+      <div className="rounded-xl border-2 border-amber-200 bg-amber-50 p-6 shadow-sm">
+        <div className="flex flex-wrap items-center justify-between gap-4">
+          <div className="flex items-center gap-4">
+            <div className="flex h-14 w-14 items-center justify-center rounded-full bg-amber-100">
+              <Award className="h-7 w-7 text-amber-700" />
+            </div>
+            <div>
+              <h3 className="text-lg font-bold text-amber-900">Final Assessment</h3>
+              <p className="text-sm text-amber-800">
+                Complete the final assessment to finish this module
+              </p>
+            </div>
+          </div>
+          <Link
+            href="/daily-learning/reasoning?node=reasoning-final-study"
+            className="rounded-lg bg-amber-600 px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-amber-700"
+          >
+            Open Final Assessment
+          </Link>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+export default function ReasoningPage() {
+  return (
+    <DashboardLayout>
+      <Suspense fallback={<div className="p-6 text-gray-500">Loading…</div>}>
+        <ReasoningContent />
+      </Suspense>
     </DashboardLayout>
   )
 }

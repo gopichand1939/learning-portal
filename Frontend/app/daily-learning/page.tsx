@@ -2,7 +2,7 @@
 
 import DashboardLayout from '@/components/DashboardLayout'
 import Link from 'next/link'
-import { Calculator, Brain, MessageSquare, ArrowRight } from 'lucide-react'
+import { Calculator, Brain, MessageSquare, Code2, ArrowRight } from 'lucide-react'
 
 export default function DailyLearningPage() {
   return (
@@ -17,7 +17,7 @@ export default function DailyLearningPage() {
         </div>
 
         {/* Section Selection Cards */}
-        <div className="grid gap-6 md:grid-cols-3">
+        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
           {/* Aptitude Section */}
           <Link
             href="/daily-learning/aptitude"
@@ -71,6 +71,26 @@ export default function DailyLearningPage() {
             </h3>
             <p className="mb-4 text-sm text-gray-600">
               Reading comprehension, vocabulary, grammar, and verbal reasoning skills
+            </p>
+            <div className="flex items-center gap-2 text-sm font-medium text-primary-600 group-hover:text-primary-700">
+              Start Learning
+              <ArrowRight className="h-4 w-4" />
+            </div>
+          </Link>
+
+          {/* Python Programming Section */}
+          <Link
+            href="/daily-learning/python"
+            className="group rounded-xl border-2 border-gray-200 bg-white p-6 shadow-sm transition-all hover:border-primary-500 hover:shadow-lg"
+          >
+            <div className="mb-4 flex h-32 items-center justify-center rounded-lg bg-amber-100 group-hover:bg-amber-200">
+              <Code2 className="h-16 w-16 text-amber-600" />
+            </div>
+            <h3 className="mb-2 text-xl font-semibold text-gray-900">
+              Python Programming
+            </h3>
+            <p className="mb-4 text-sm text-gray-600">
+              Introduction to Python, I/O, operators, loops, strings, lists, functions, and recursion
             </p>
             <div className="flex items-center gap-2 text-sm font-medium text-primary-600 group-hover:text-primary-700">
               Start Learning

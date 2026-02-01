@@ -6,8 +6,7 @@ import Link from 'next/link'
 import Image from 'next/image'
 import { Lock, Mail } from 'lucide-react'
 import collegelogo from '@/app/collegelogo.png'
-
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:15013'
+import { API_AUTH_RESET_PASSWORD } from '@/lib/constants'
 
 export default function ForgotPasswordPage() {
   const router = useRouter()
@@ -31,7 +30,7 @@ export default function ForgotPasswordPage() {
     }
     setLoading(true)
     try {
-      const res = await fetch(`${API_URL}/api/auth/reset-password`, {
+      const res = await fetch(API_AUTH_RESET_PASSWORD, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email: email.trim(), newPassword }),

@@ -4,23 +4,21 @@ import { Suspense, useMemo } from 'react'
 import DashboardLayout from '@/components/DashboardLayout'
 import Link from 'next/link'
 import { useSearchParams } from 'next/navigation'
-import { ArrowLeft, Award } from 'lucide-react'
+import { ArrowLeft } from 'lucide-react'
 import ModuleContentPanel from '@/components/ModuleContentPanel'
-import { verbalModule, findNodeById } from '@/lib/learningModules'
+import { pythonModule, findNodeById } from '@/lib/learningModules'
 import type { ModuleNode } from '@/lib/learningModules'
 
-function VerbalContent() {
+function PythonContent() {
   const searchParams = useSearchParams()
   const nodeId = searchParams.get('node')
   const { selectedNode, selectedPath } = useMemo(() => {
     if (!nodeId) return { selectedNode: null as ModuleNode | null, selectedPath: [] as string[] }
-    const found = findNodeById(verbalModule, nodeId)
+    const found = findNodeById(pythonModule, nodeId)
     return found
       ? { selectedNode: found.node, selectedPath: found.path }
       : { selectedNode: null, selectedPath: [] }
   }, [nodeId])
-  const progress = moduleProgressDefault.verbal
-
   return (
     <div className="flex flex-col gap-6">
       <div className="flex items-center gap-4">
@@ -33,7 +31,7 @@ function VerbalContent() {
         </Link>
         <div>
           <h1 className="text-2xl font-bold text-gray-900 md:text-3xl">
-            Verbal Ability
+            Python Programming
           </h1>
           <p className="mt-1 text-gray-600">
             Module-wise learning — select a topic from the sidebar
@@ -45,40 +43,18 @@ function VerbalContent() {
         <ModuleContentPanel
           selectedNode={selectedNode}
           path={selectedPath}
-          moduleTitle="Verbal Ability"
+          moduleTitle="Python Programming"
         />
-      </div>
-
-      <div className="rounded-xl border-2 border-amber-200 bg-amber-50 p-6 shadow-sm">
-        <div className="flex flex-wrap items-center justify-between gap-4">
-          <div className="flex items-center gap-4">
-            <div className="flex h-14 w-14 items-center justify-center rounded-full bg-amber-100">
-              <Award className="h-7 w-7 text-amber-700" />
-            </div>
-            <div>
-              <h3 className="text-lg font-bold text-amber-900">Final Assessment</h3>
-              <p className="text-sm text-amber-800">
-                Complete the final assessment to finish this module
-              </p>
-            </div>
-          </div>
-          <Link
-            href="/daily-learning/verbal?node=verbal-final-study"
-            className="rounded-lg bg-amber-600 px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-amber-700"
-          >
-            Open Final Assessment
-          </Link>
-        </div>
       </div>
     </div>
   )
 }
 
-export default function VerbalPage() {
+export default function PythonPage() {
   return (
     <DashboardLayout>
       <Suspense fallback={<div className="p-6 text-gray-500">Loading…</div>}>
-        <VerbalContent />
+        <PythonContent />
       </Suspense>
     </DashboardLayout>
   )

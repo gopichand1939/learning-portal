@@ -12,10 +12,45 @@ import {
   Award,
   Lock,
   Unlock,
+  Calculator,
+  Brain,
+  MessageSquare,
+  Code2,
 } from 'lucide-react'
 import { studentData } from '@/lib/mockData'
+import { useLearningProgress } from '@/contexts/LearningProgressContext'
+import { aptitudeModule, reasoningModule, verbalModule, pythonModule, getLeafIds } from '@/lib/learningModules'
 
 export default function DashboardPage() {
+  const { completedIds } = useLearningProgress()
+  const aptitudeLeaves = getLeafIds(aptitudeModule)
+  const reasoningLeaves = getLeafIds(reasoningModule)
+  const verbalLeaves = getLeafIds(verbalModule)
+  const pythonLeaves = getLeafIds(pythonModule)
+  const progressAptitude = aptitudeLeaves.length
+    ? Math.round((aptitudeLeaves.filter((id) => completedIds.has(id)).length / aptitudeLeaves.length) * 100)
+    : 0
+  const progressReasoning = reasoningLeaves.length
+    ? Math.round((reasoningLeaves.filter((id) => completedIds.has(id)).length / reasoningLeaves.length) * 100)
+    : 0
+  const progressVerbal = verbalLeaves.length
+    ? Math.round((verbalLeaves.filter((id) => completedIds.has(id)).length / verbalLeaves.length) * 100)
+    : 0
+  const progressPython = pythonLeaves.length
+    ? Math.round((pythonLeaves.filter((id) => completedIds.has(id)).length / pythonLeaves.length) * 100)
+    : 0
+  const totalLeaves = aptitudeLeaves.length + reasoningLeaves.length + verbalLeaves.length + pythonLeaves.length
+  const overallProgress = totalLeaves
+    ? Math.round(
+        ((aptitudeLeaves.filter((id) => completedIds.has(id)).length +
+          reasoningLeaves.filter((id) => completedIds.has(id)).length +
+          verbalLeaves.filter((id) => completedIds.has(id)).length +
+          pythonLeaves.filter((id) => completedIds.has(id)).length) /
+          totalLeaves) *
+          100
+      )
+    : 0
+
   return (
     <DashboardLayout>
       <div className="space-y-6">
@@ -27,13 +62,57 @@ export default function DashboardPage() {
           </p>
         </div>
 
+        {/* Module completion % - shown on dashboard */}
+        <div className="rounded-xl border border-gray-200 bg-white p-6 shadow-sm">
+          <h3 className="text-lg font-semibold text-gray-900">Module completion</h3>
+          <div className="mt-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+            <div className="flex items-center gap-3 rounded-lg border border-gray-100 bg-gray-50/50 p-4">
+              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-primary-100">
+                <Calculator className="h-5 w-5 text-primary-600" />
+              </div>
+              <div>
+                <p className="text-sm font-medium text-gray-700">Quantitative Aptitude</p>
+                <p className="text-xl font-bold text-gray-900">{progressAptitude}% complete</p>
+              </div>
+            </div>
+            <div className="flex items-center gap-3 rounded-lg border border-gray-100 bg-gray-50/50 p-4">
+              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-primary-100">
+                <Brain className="h-5 w-5 text-primary-600" />
+              </div>
+              <div>
+                <p className="text-sm font-medium text-gray-700">Logical Reasoning</p>
+                <p className="text-xl font-bold text-gray-900">{progressReasoning}% complete</p>
+              </div>
+            </div>
+            <div className="flex items-center gap-3 rounded-lg border border-gray-100 bg-gray-50/50 p-4">
+              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-primary-100">
+                <MessageSquare className="h-5 w-5 text-primary-600" />
+              </div>
+              <div>
+                <p className="text-sm font-medium text-gray-700">Verbal Ability</p>
+                <p className="text-xl font-bold text-gray-900">{progressVerbal}% complete</p>
+              </div>
+            </div>
+            <div className="flex items-center gap-3 rounded-lg border border-gray-100 bg-gray-50/50 p-4">
+              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-amber-100">
+                <Code2 className="h-5 w-5 text-amber-600" />
+              </div>
+              <div>
+                <p className="text-sm font-medium text-gray-700">Python Programming</p>
+                <p className="text-xl font-bold text-gray-900">{progressPython}% complete</p>
+              </div>
+            </div>
+          </div>
+          <p className="mt-3 text-sm text-gray-500">Overall: {overallProgress}% of all modules complete</p>
+        </div>
+
         {/* Stats Grid */}
         <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
           <StatCard
             title="Overall Progress"
-            value={`${studentData.overallProgress}%`}
+            value={`${overallProgress}%`}
             icon={TrendingUp}
-            trend="+5% this week"
+            trend="Based on completed modules"
           />
           <StatCard
             title="Study Streak"
@@ -129,7 +208,7 @@ export default function DashboardPage() {
         <div className="grid gap-6 lg:grid-cols-2">
           <ProgressCard
             title="Course Completion"
-            progress={studentData.overallProgress}
+            progress={overallProgress}
             color="bg-primary-600"
           />
           <ProgressCard

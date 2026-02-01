@@ -17,7 +17,7 @@ export function setCompleted(nodeId: string, completed: boolean): void {
   const ids = getCompletedIds()
   if (completed) ids.add(nodeId)
   else ids.delete(nodeId)
-  localStorage.setItem(STORAGE_KEY, JSON.stringify([...ids]))
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(Array.from(ids)))
 }
 
 export function isCompleted(nodeId: string): boolean {

@@ -80,7 +80,7 @@ export default function Sidebar({ isOpen = false, onClose }: SidebarProps) {
       localStorage.removeItem('token')
       localStorage.removeItem('user')
     }
-    window.location.href = '/login'
+    window.location.href = '/'
   }
 
   const toggleMenu = (href: string) => {

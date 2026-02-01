@@ -2,6 +2,7 @@ import Link from 'next/link'
 import Image from 'next/image'
 import { ArrowRight, BookOpen, Users, Award, Target, CheckCircle } from 'lucide-react'
 import collegelogo from './collegelogo.png'
+import HomeCarousel from '@/components/HomeCarousel'
 
 export default function LandingPage() {
   return (
@@ -28,6 +29,9 @@ export default function LandingPage() {
           </div>
         </div>
       </header>
+
+      {/* Carousel - 3 Golden Jubilee images */}
+      <HomeCarousel />
 
       {/* Hero Section */}
       <section className="mx-auto max-w-7xl px-4 py-20 sm:px-6 lg:px-8">

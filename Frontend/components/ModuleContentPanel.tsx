@@ -3,6 +3,7 @@
 import { BookOpen, FileQuestion, ClipboardList, Code2, CheckCircle } from 'lucide-react'
 import type { ModuleNode } from '@/lib/learningModules'
 import { useLearningProgress } from '@/contexts/LearningProgressContext'
+import CodingPracticePanel from '@/components/CodingPracticePanel'
 
 interface ModuleContentPanelProps {
   selectedNode: ModuleNode | null
@@ -37,6 +38,32 @@ export default function ModuleContentPanel({
   const isLeaf = !!selectedNode.type
   const completed = isLeaf && isCompleted(selectedNode.id)
 
+  if (isCoding) {
+    return (
+      <div className="flex flex-1 flex-col overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm">
+        <CodingPracticePanel
+          nodeId={selectedNode.id}
+          path={path.length ? path : [moduleTitle, selectedNode.label].filter(Boolean)}
+          onMarkComplete={() => {}}
+        />
+        <div className="flex flex-wrap items-center justify-between gap-4 border-t border-gray-200 px-4 py-3">
+          <button
+            type="button"
+            onClick={() => !completed && markComplete(selectedNode.id)}
+            disabled={completed}
+            className={completed
+              ? 'flex cursor-default items-center gap-2 rounded-lg bg-primary-100 px-4 py-2.5 text-sm font-semibold text-primary-700'
+              : 'flex items-center gap-2 rounded-lg bg-primary-600 px-4 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-primary-700'
+            }
+          >
+            <CheckCircle className="h-5 w-5 shrink-0" />
+            {completed ? 'Marked as complete' : 'Mark as complete'}
+          </button>
+        </div>
+      </div>
+    )
+  }
+
   return (
     <div className="flex flex-1 flex-col overflow-auto rounded-xl border border-gray-200 bg-white p-6 shadow-sm">
       <div className="mb-4 border-b border-gray-200 pb-4">
@@ -59,15 +86,6 @@ export default function ModuleContentPanel({
             <h3 className="text-lg font-semibold text-gray-900">Basic Exercise (10 Questions)</h3>
             <p className="mt-2 text-sm text-gray-600">
               Practice interface with 10 questions. Start when ready.
-            </p>
-          </div>
-        )}
-        {isCoding && (
-          <div className="flex flex-col items-center justify-center py-12 text-center">
-            <Code2 className="mb-4 h-14 w-14 text-blue-600" />
-            <h3 className="text-lg font-semibold text-gray-900">Coding Practice (2 Questions – Interview POV)</h3>
-            <p className="mt-2 text-sm text-gray-600">
-              Two coding questions from an interview perspective. Solve in the code editor.
             </p>
           </div>
         )}

@@ -101,6 +101,11 @@ function SidebarTreeNode({
   const completed = isLeafNode
     ? isCompleted(node.id)
     : leafIdsUnder.length > 0 && leafIdsUnder.every((id) => completedIds.has(id))
+  const completionPct =
+    !isLeafNode && leafIdsUnder.length > 0
+      ? Math.round((leafIdsUnder.filter((id) => completedIds.has(id)).length / leafIdsUnder.length) * 100)
+      : 0
+  const isRootSection = depth === 0 && hasChildren
 
   if (isLeafNode && node.type) {
     const Icon =
@@ -160,14 +165,27 @@ function SidebarTreeNode({
               <ChevronRight className="h-3.5 w-3 text-gray-500" />
             )}
           </span>
-          <span className="flex w-4 shrink-0 justify-center">
-            {completed ? (
-              <CheckCircle className="h-3.5 w-3 text-green-600" aria-hidden />
-            ) : (
-              <Circle className="h-3.5 w-3 text-gray-400" aria-hidden />
-            )}
-          </span>
+          {!isRootSection && (
+            <span className="flex h-6 w-6 shrink-0 items-center justify-center">
+              {completed ? (
+                <CheckCircle className="h-3.5 w-3 text-green-600" aria-hidden />
+              ) : (
+                <Circle className="h-3.5 w-3 text-gray-400" aria-hidden />
+              )}
+            </span>
+          )}
           <span className="min-w-0 flex-1 truncate text-xs">{node.label}</span>
+          {isRootSection && (
+            <span
+              className={cn(
+                'flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-[10px] font-bold',
+                completed ? 'bg-green-100 text-green-700' : 'border-2 border-gray-300 bg-gray-50 text-gray-600'
+              )}
+              aria-label={`${completionPct}% complete`}
+            >
+              {completionPct}%
+            </span>
+          )}
         </button>
         {expanded &&
           node.children!.map((child) => (

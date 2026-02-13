@@ -5,7 +5,6 @@ import { useRouter, useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 import Image from 'next/image'
 import { Lock, Mail } from 'lucide-react'
-import collegelogo from '@/app/collegelogo.png'
 import { API_AUTH_LOGIN } from '@/lib/constants'
 
 function LoginFallback() {
@@ -81,7 +80,7 @@ function LoginContent() {
         <div className="mb-8 text-center">
           <Link href="/" className="inline-flex items-center gap-3">
             <Image
-              src={collegelogo}
+              src="/carousel/plogo.png"
               alt="College Logo"
               width={56}
               height={56}

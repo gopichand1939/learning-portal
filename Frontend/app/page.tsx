@@ -19,7 +19,6 @@ import {
   MessageSquare,
   Code2,
 } from 'lucide-react'
-import collegelogo from './collegelogo.png'
 import HomeCarousel from '@/components/HomeCarousel'
 import AnimateInView from '@/components/AnimateInView'
 
@@ -100,7 +99,7 @@ export default function LandingPage() {
         <div className="mx-auto flex h-20 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
           <div className="flex items-center">
             <Image
-              src={collegelogo}
+              src="/carousel/plogo.png"
               alt="Dr. Lankapalli Bullayya College of Engineering"
               width={280}
               height={76}

@@ -3,7 +3,6 @@
 import Image from 'next/image'
 import { Bell, Search, User, Menu } from 'lucide-react'
 import { studentData } from '@/lib/mockData'
-import collegelogo from '@/app/collegelogo.png'
 
 interface NavbarProps {
   onMenuClick?: () => void
@@ -16,7 +15,7 @@ export default function Navbar({ onMenuClick }: NavbarProps) {
         <div className="flex items-center">
           <div className="flex h-16 items-center">
             <Image
-              src={collegelogo}
+              src="/carousel/plogo.png"
               alt="College Logo"
               width={500}
               height={64}

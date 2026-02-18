@@ -40,11 +40,11 @@ function AptitudeContent() {
       </div>
 
       <div className="min-h-[400px]">
-        <ModuleContentPanel
-          selectedNode={selectedNode}
-          path={selectedPath}
-          moduleTitle="Quantitative Aptitude"
-        />
+<ModuleContentPanel
+  selectedNode={selectedNode}
+  path={selectedPath}
+/>
+
       </div>
 
       <div className="rounded-xl border-2 border-amber-200 bg-amber-50 p-6 shadow-sm">

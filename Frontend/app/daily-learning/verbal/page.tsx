@@ -44,7 +44,6 @@ function VerbalContent() {
         <ModuleContentPanel
           selectedNode={selectedNode}
           path={selectedPath}
-          moduleTitle="Verbal Ability"
         />
       </div>
 

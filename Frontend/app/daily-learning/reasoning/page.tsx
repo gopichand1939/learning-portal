@@ -43,7 +43,6 @@ function ReasoningContent() {
         <ModuleContentPanel
           selectedNode={selectedNode}
           path={selectedPath}
-          moduleTitle="Logical Reasoning"
         />
       </div>
 

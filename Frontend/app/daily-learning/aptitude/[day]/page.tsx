@@ -15,12 +15,12 @@ import {
   ArrowLeft,
 } from 'lucide-react'
 import Link from 'next/link'
-import { aptitudeDailyContent } from '@/lib/daily-learning/aptitude'
+import { aptitudeDailyContent } from '@/lib/aptitude'
 import {
   dailyProgress,
   dailySchedule,
 } from '@/lib/mockData'
-import type { AptitudeDayContent } from '@/lib/daily-learning/aptitude/types'
+import type { AptitudeDayContent } from '@/lib/aptitude'
 
 export default function AptitudeDayPage() {
   const params = useParams()
@@ -94,7 +94,7 @@ export default function AptitudeDayPage() {
             </h2>
           </div>
           <div className="space-y-3">
-            {dailySchedule.map((item, index) => (
+{dailySchedule.map((item: any, index: number) => (
               <div
                 key={index}
                 className="flex items-center gap-4 rounded-lg border border-gray-200 bg-gray-50 p-4"
@@ -166,7 +166,7 @@ export default function AptitudeDayPage() {
 
           {/* Learning Material */}
           <div className="space-y-4">
-            {aptitudeTopics.map((topic) => (
+{aptitudeTopics.map((topic: any) => (
               <div
                 key={topic.id}
                 className="rounded-lg border border-gray-200 bg-gray-50 p-6 transition-all hover:border-primary-300 hover:shadow-md"
@@ -187,7 +187,7 @@ export default function AptitudeDayPage() {
                       Key Concepts:
                     </h4>
                     <div className="space-y-6">
-                      {topic.concepts.map((concept, idx) => (
+{topic.concepts.map((concept: any, idx: number) => (
                         <div
                           key={idx}
                           className="rounded-lg border border-gray-200 bg-white p-5 shadow-sm"
@@ -211,7 +211,7 @@ export default function AptitudeDayPage() {
                                   Important Formulas:
                                 </h6>
                                 <ul className="space-y-1.5">
-                                  {concept.formulas.map((formula, fIdx) => (
+{concept.formulas.map((formula: string, fIdx: number) => (
                                     <li
                                       key={fIdx}
                                       className="flex items-start gap-2 text-sm text-blue-800"
@@ -229,7 +229,7 @@ export default function AptitudeDayPage() {
                                   Important Notes:
                                 </h6>
                                 <ul className="space-y-1.5">
-                                  {concept.notes.map((note, nIdx) => (
+{concept.notes.map((note: string, nIdx: number) => (
                                     <li
                                       key={nIdx}
                                       className="flex items-start gap-2 text-sm text-yellow-800"
@@ -253,7 +253,7 @@ export default function AptitudeDayPage() {
                       Study Materials:
                     </h4>
                     <div className="space-y-2">
-                      {topic.materials.map((material, idx) => (
+{topic.materials.map((material: string, idx: number) => (
                         <div
                           key={idx}
                           className="flex items-center gap-2 rounded-md bg-white p-3 text-sm text-gray-700 shadow-sm"
@@ -300,7 +300,7 @@ export default function AptitudeDayPage() {
 
           {/* Practice Questions */}
           <div className="space-y-6">
-            {aptitudePracticeQuestions.map((q) => {
+{aptitudePracticeQuestions.map((q: any) => {
               const anyQ = q as any
               const isMcq = Array.isArray(anyQ.options)
               const correctOptionIndex =
@@ -409,7 +409,7 @@ export default function AptitudeDayPage() {
                           Step-by-Step Solution:
                         </p>
                         <ul className="space-y-1.5">
-                          {q.solution.map((step, stepIdx) => (
+{q.solution.map((step: string, stepIdx: number) => (
                             <li
                               key={stepIdx}
                               className="flex items-start gap-2 text-sm text-blue-800"
@@ -470,7 +470,7 @@ export default function AptitudeDayPage() {
             <>
               {/* Question Navigation */}
               <div className="mb-6 flex flex-wrap gap-2">
-                {aptitudeTestQuestions.map((q, idx) => (
+{aptitudeTestQuestions.map((q: any, idx: number) => (
                   <button
                     key={q.id}
                     onClick={() => setCurrentTestQuestion(idx)}
@@ -501,8 +501,9 @@ export default function AptitudeDayPage() {
                   {aptitudeTestQuestions[currentTestQuestion].question}
                 </h3>
                 <div className="space-y-3">
-                  {aptitudeTestQuestions[currentTestQuestion].options.map(
-                    (option, idx) => (
+{aptitudeTestQuestions[currentTestQuestion].options.map(
+  (option: string, idx: number) => (
+
                       <label
                         key={idx}
                         className={`flex cursor-pointer items-center gap-3 rounded-lg border p-3 transition-colors ${

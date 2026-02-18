@@ -40,11 +40,11 @@ function PythonContent() {
       </div>
 
       <div className="min-h-[400px]">
-        <ModuleContentPanel
-          selectedNode={selectedNode}
-          path={selectedPath}
-          moduleTitle="Python Programming"
-        />
+<ModuleContentPanel
+  selectedNode={selectedNode}
+  path={selectedPath}
+/>
+
       </div>
     </div>
   )

@@ -1,41 +1,23 @@
 'use client'
 
-import {
-  BookOpen,
-  CheckCircle,
-} from 'lucide-react'
+import { BookOpen, CheckCircle } from 'lucide-react'
 import type { ModuleNode } from '@/lib/learningModules'
 import { useLearningProgress } from '@/contexts/LearningProgressContext'
 import CodingPracticePanel from '@/components/CodingPracticePanel'
 import ExercisePanel from '@/components/ExercisePanel'
 import AssignmentPanel from '@/components/AssignmentPanel'
 
-// CONTENT IMPORTS
-import { numbersStudyMaterial } from '@/lib/aptitude/numbers/study'
-import { numbersBasicExercise } from '@/lib/aptitude/numbers/exercise'
-import { numbersAssignment } from '@/lib/aptitude/numbers/assignment'
+// ✅ SINGLE AUTO IMPORT
+import {
+  studyContentMap,
+  exerciseContentMap,
+  assignmentContentMap,
+} from '@/lib/aptitude'
 
 interface ModuleContentPanelProps {
   selectedNode: ModuleNode | null
   path: string[]
-  moduleTitle: string
 }
-
-/* ================= CONTENT MAPS ================= */
-
-const studyContentMap: Record<string, any> = {
-  'numbers-study': numbersStudyMaterial,
-}
-
-const exerciseContentMap: Record<string, any> = {
-  'numbers-exercise': numbersBasicExercise,
-}
-
-const assignmentContentMap: Record<string, any> = {
-  'numbers-assignment': numbersAssignment,
-}
-
-/* ================= COMPONENT ================= */
 
 export default function ModuleContentPanel({
   selectedNode,
@@ -55,7 +37,6 @@ export default function ModuleContentPanel({
     )
   }
 
-  const pathStr = path.length ? path.join(' → ') : selectedNode.label
   const isStudy = selectedNode.type === 'study'
   const isExercise = selectedNode.type === 'exercise'
   const isAssignment = selectedNode.type === 'assignment'
@@ -63,7 +44,6 @@ export default function ModuleContentPanel({
   const isLeaf = !!selectedNode.type
   const completed = isLeaf && isCompleted(selectedNode.id)
 
-  /* ================= CODING ================= */
   if (isCoding) {
     return (
       <div className="flex flex-1 flex-col rounded-xl border bg-white">
@@ -80,7 +60,7 @@ export default function ModuleContentPanel({
     <div className="flex flex-1 flex-col rounded-xl border bg-white p-6 shadow-sm">
       {/* HEADER */}
       <div className="mb-4 border-b pb-4">
-        <p className="text-sm text-gray-500">{pathStr}</p>
+        <p className="text-sm text-gray-500">{path.join(' → ')}</p>
         <h2 className="text-xl font-bold text-gray-900">
           {selectedNode.label}
         </h2>
@@ -89,45 +69,37 @@ export default function ModuleContentPanel({
       {/* CONTENT */}
       <div className="flex-1 space-y-6">
 
-        {/* STUDY */}
-        {isStudy && (() => {
-          const content = studyContentMap[selectedNode.id]
-          if (!content) return <div>Content coming soon…</div>
+        {isStudy && studyContentMap[selectedNode.id] && (
+          <div>
+            <h3 className="text-2xl font-bold">
+              {studyContentMap[selectedNode.id].title}
+            </h3>
+            <p className="mt-2 text-gray-600">
+              {studyContentMap[selectedNode.id].description}
+            </p>
 
-          return (
-            <div className="space-y-6">
-              <div>
-                <h3 className="text-2xl font-bold">{content.title}</h3>
-                <p className="mt-2 text-gray-600">{content.description}</p>
-              </div>
-
-              {content.sections.map((section: any, i: number) => (
-                <div key={i}>
-                  <h4 className="font-semibold text-lg">{section.heading}</h4>
-                  <ul className="list-disc pl-6 text-gray-700">
-                    {section.points.map((p: string, j: number) => (
+            {studyContentMap[selectedNode.id].sections.map(
+              (sec: any, i: number) => (
+                <div key={i} className="mt-4">
+                  <h4 className="font-semibold">{sec.heading}</h4>
+                  <ul className="list-disc pl-6">
+                    {sec.points.map((p: string, j: number) => (
                       <li key={j}>{p}</li>
                     ))}
                   </ul>
                 </div>
-              ))}
-            </div>
-          )
-        })()}
+              )
+            )}
+          </div>
+        )}
 
-        {/* EXERCISE */}
-        {isExercise && (() => {
-          const exercise = exerciseContentMap[selectedNode.id]
-          if (!exercise) return <div>Exercise coming soon…</div>
-          return <ExercisePanel exercise={exercise} />
-        })()}
+        {isExercise && exerciseContentMap[selectedNode.id] && (
+          <ExercisePanel exercise={exerciseContentMap[selectedNode.id]} />
+        )}
 
-        {/* ASSIGNMENT */}
-        {isAssignment && (() => {
-          const assignment = assignmentContentMap[selectedNode.id]
-          if (!assignment) return <div>Assignment coming soon…</div>
-          return <AssignmentPanel assignment={assignment} />
-        })()}
+        {isAssignment && assignmentContentMap[selectedNode.id] && (
+          <AssignmentPanel assignment={assignmentContentMap[selectedNode.id]} />
+        )}
       </div>
 
       {/* FOOTER */}
